@@ -2,7 +2,7 @@
 title: martingalemeasure
 email:
 description: > # this means to ignore newlines until "baseurl:"
-  The web blog of Jeffrey Rosenbluth. Exploring computer science and
+  The blog of Jeffrey Rosenbluth. Exploring computer science and
   mathematics.
 baseurl: "" # the subpath of your site, e.g. /blog/
 url: "http://jeffreyrosenbluth.github.io" # the base hostname & protocol for your site

@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Monkey typing abracadabra
+title: Monkey Typing ABRACADABRA
 ---
 
 Since I decided to call this blog <strong>martingalemeasure</strong> it seems only fitting that the first post should be about probability; martingales in particular. In my favorite introductory book on measure theoretical probability, "Probablity with Martingales" by David Williams, we find an exercise in Chapter 10, which I paraphrase here:
