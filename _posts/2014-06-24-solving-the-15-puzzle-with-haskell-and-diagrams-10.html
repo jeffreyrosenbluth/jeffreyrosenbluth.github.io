@@ -1,47 +1,10 @@
 ---
 layout: post
 title: Solving the 15-Puzzle with Haskell and diagrams
-date: 2014-06-24 20:15:33.000000000 -04:00
-categories:
-- Haskell
-tags:
-- A*
-- animated GIF
-- diagrams
-- haskell
-status: publish
-type: post
-published: true
-meta:
-  _edit_last: '44456243'
-  _publicize_pending: '1'
-  publicize_google_plus_url: https://plus.google.com/105752102888359037302/posts/hFcy1MQwuh1
-  geo_public: '0'
-  _wpas_facebook_publicize_failure: O:13:"Keyring_Error":2:{s:16:"
-  publicize_facebook_url: https://facebook.com/
-  _wpas_done_6130393: '1'
-  _publicize_done_external: a:1:{s:11:"google_plus";a:1:{s:21:"105752102888359037302";b:1;}}
-  publicize_twitter_user: JeffRosenbluth
-  publicize_twitter_url: http://t.co/ERLPGIHfc3
-  _wpas_done_6130416: '1'
-  publicize_linkedin_url: ''
-  _wpas_done_6130406: '1'
-  _wpas_skip_6130410: '1'
-  _wpas_skip_6130393: '1'
-  _wpas_skip_6130416: '1'
-  _wpas_skip_6130406: '1'
-author:
-  login: jeffreyrosenbluth
-  email: jeffrey.rosenbluth@gmail.com
-  display_name: jeffreyrosenbluth
-  first_name: ''
-  last_name: ''
-excerpt: !ruby/object:Hpricot::Doc
-  options: {}
 ---
 <p>Something I like to do when learning a new programming language is to code a familiar project. This lets me gauge my progress and make comparisons with languages I'm more comfortable with. One of my favorite "familiar" projects is a solver for the 15-puzzle. If you're not familiar with the 15-puzzle, it's a classic grid based game with 4 rows and 4 columns containing a total of 15 tiles. The tiles are labeled 1-15 and there is one blank space. The object is to put the tiles in ascending order by repeatedly sliding a tile into the blank space. See <a href="http://en.wikipedia.org/wiki/15_puzzlel">15 puzzle</a>.</p>
 <div style="text-align:center;">
-<div class="figure"><img src="assets/puzzle1.gif" alt="45 move puzzle" /></p>
+<div class="figure"><img src="/assets/puzzle1.gif" alt="45 move puzzle" /></p>
 <p class="caption">45 move puzzle</p>
 </div>
 </div>
@@ -49,7 +12,7 @@ excerpt: !ruby/object:Hpricot::Doc
 <p>While studying Haskell and working on the <a href="http://projects.haskell.org/diagrams/">diagrams project</a> I decided that I could take my 15 puzzle solution to the next level, by using <em>diagrams</em> to animate it.</p>
 <p>We start by getting the imports out of the way.</p>
 <pre class="sourceCode haskell"><code class="sourceCode haskell">&gt; <span style="color:blue;font-weight:bold;">module</span> Main <span style="color:blue;font-weight:bold;">where</span>
-&gt; 
+&gt;
 &gt; <span style="color:blue;font-weight:bold;">import</span>           Data.Array.Unboxed
 &gt; <span style="color:blue;font-weight:bold;">import</span>           Data.List                           <span style="color:red;">(</span>elemIndex<span style="color:red;">)</span>
 &gt; <span style="color:blue;font-weight:bold;">import</span>           Data.List.Split                     <span style="color:red;">(</span>chunksOf<span style="color:red;">)</span>
@@ -72,7 +35,7 @@ excerpt: !ruby/object:Hpricot::Doc
 </code></pre>
 <p>The number of rows and columns in the puzzle is the upper bound of the array since we are using 1 (not 0) as the starting indices for our array.</p>
 <pre class="sourceCode haskell"><code class="sourceCode haskell">&gt; dim <span style="color:red;">::</span> Board <span style="color:red;">-&gt;</span> Int
-&gt; dim <span style="color:red;">=</span> snd . snd . bounds 
+&gt; dim <span style="color:red;">=</span> snd . snd . bounds
 </code></pre>
 <p>Assuming we have a function <code>drawTile</code> that makes a number into a tile diagrams we can now create a diagram from a game board.</p>
 <pre class="sourceCode haskell"><code class="sourceCode haskell">&gt; boardDia <span style="color:red;">::</span> Board <span style="color:red;">-&gt;</span> Diagram B R2
@@ -80,22 +43,22 @@ excerpt: !ruby/object:Hpricot::Doc
 &gt;            . frame <span class="hs-num">0.1</span>
 &gt;            . vcat' <span style="color:red;">(</span>with &amp; sep .~ <span class="hs-num">0.075</span><span style="color:red;">)</span>
 &gt;            . map <span style="color:red;">(</span>hcat' <span style="color:red;">(</span>with &amp; sep .~ <span class="hs-num">0.075</span><span style="color:red;">)</span><span style="color:red;">)</span>
-&gt;            . <span style="color:red;">(</span>map . map<span style="color:red;">)</span> drawTile $ fromBoard b 
+&gt;            . <span style="color:red;">(</span>map . map<span style="color:red;">)</span> drawTile $ fromBoard b
 </code></pre>
 <p>Here is <code>drawTile</code></p>
 <pre class="sourceCode haskell"><code class="sourceCode haskell">&gt; drawTile <span style="color:red;">::</span> Int <span style="color:red;">-&gt;</span> Diagram B R2
 &gt; drawTile <span class="hs-num">0</span> <span style="color:red;">=</span> square <span class="hs-num">1</span> # lw none
-&gt; drawTile s <span style="color:red;">=</span> text <span style="color:red;">(</span>show s<span style="color:red;">)</span> 
-&gt;            # fontSize <span style="color:red;">(</span>Local <span class="hs-num">1</span><span style="color:red;">)</span> 
+&gt; drawTile s <span style="color:red;">=</span> text <span style="color:red;">(</span>show s<span style="color:red;">)</span>
+&gt;            # fontSize <span style="color:red;">(</span>Local <span class="hs-num">1</span><span style="color:red;">)</span>
 &gt;            # fc white
 &gt;            # scale <span class="hs-num">0.5</span>
 &gt;            # bold
-&gt;           &lt;&gt; roundedRect <span class="hs-num">1</span> <span class="hs-num">1</span> <span class="hs-num">0.2</span> 
+&gt;           &lt;&gt; roundedRect <span class="hs-num">1</span> <span class="hs-num">1</span> <span class="hs-num">0.2</span>
 &gt;            # fc darkred
 </code></pre>
 <p>Now we need to assemble a bunch of board diagrams into a GIF. All we need to do is pass a list of diagrams and delay times <code>[(Diagram B R2, Int)]</code> to the <code>mainWith</code> function, choose a .gif file extension when we run the program and <em>diagrams</em> will make an animated GIF.</p>
 <pre class="sourceCode haskell"><code class="sourceCode haskell">&gt; dias <span style="color:red;">::</span> <span style="color:red;">[</span>Board<span style="color:red;">]</span> <span style="color:red;">-&gt;</span> <span style="color:red;">[</span>Diagram B R2<span style="color:red;">]</span>
-&gt; dias bs <span style="color:red;">=</span> map boardDia bs 
+&gt; dias bs <span style="color:red;">=</span> map boardDia bs
 </code></pre>
 <p>We show each board for 1 second and pause for 3 seconds before repeating the GIF loop.</p>
 <pre class="sourceCode haskell"><code class="sourceCode haskell">&gt; times <span style="color:red;">::</span> Int <span style="color:red;">-&gt;</span> <span style="color:red;">[</span>Int<span style="color:red;">]</span>
@@ -106,7 +69,7 @@ excerpt: !ruby/object:Hpricot::Doc
 </code></pre>
 <p>Here is an example main program that solves a puzzle read in from a text file. The format of the puzzle file has as first line a single integer representing the dimension of the puzzle and each additional line a string of integers representing a row of the starting puzzle board. For example the puzzle at the top of the post has file:</p>
 <pre><code>4
- 9  2  8  11  
+ 9  2  8  11
  0  5 13   7
 15  1  4  10
  3 14  6  12</code></pre>
@@ -120,7 +83,7 @@ excerpt: !ruby/object:Hpricot::Doc
 &gt;         [] <span style="color:red;">-&gt;</span> error <span style="color:teal;">"Invalid puzzle file"</span>
 &gt;         x:xs <span style="color:red;">-&gt;</span> <span style="color:red;">(</span>x<span style="color:red;">,</span> concat xs<span style="color:red;">)</span>
 &gt;   <span style="color:blue;font-weight:bold;">let</span> p <span style="color:red;">=</span> solve . mkGameState n $ brd
-&gt;   mainWith $ gifs <span style="color:red;">(</span>boards p<span style="color:red;">)</span> 
+&gt;   mainWith $ gifs <span style="color:red;">(</span>boards p<span style="color:red;">)</span>
 </code></pre>
 <pre class="sourceCode haskell"><code class="sourceCode haskell">&gt; fromString <span style="color:red;">::</span> String <span style="color:red;">-&gt;</span> <span style="color:red;">[</span><span style="color:red;">[</span>Int<span style="color:red;">]</span><span style="color:red;">]</span>
 &gt; fromString s <span style="color:red;">=</span> <span style="color:red;">(</span>map . map<span style="color:red;">)</span> read ws
@@ -130,12 +93,12 @@ excerpt: !ruby/object:Hpricot::Doc
 <p>We are going to search for a solution using the A* algorithm. We will keep track of the state of the game in an algebraic data type called <code>GameState</code>.</p>
 <p>The game state includes the board, the number of moves up until this point and a previous state (unless this it the start state). We also cache the location of the blank tile and the manhattan distance to the goal state; so that we only need to calculate these things once.</p>
 <p>Notice that <code>GameState</code> recursively contains the game state that preceded it (wrapped in a <code>Maybe</code>) , except for the start state whose <code>previous</code> field will contain <code>Nothing</code>. This will allow us recreate all of the intermediate boards from the final solved board so that we can animate the game. We use the <code>boards</code> function to create the list containing each board from start to finish.</p>
-<pre class="sourceCode haskell"><code class="sourceCode haskell">&gt; <span style="color:blue;font-weight:bold;">data</span> GameState <span style="color:red;">=</span> GameState 
+<pre class="sourceCode haskell"><code class="sourceCode haskell">&gt; <span style="color:blue;font-weight:bold;">data</span> GameState <span style="color:red;">=</span> GameState
 &gt;   <span style="color:red;">{</span> board     <span style="color:red;">::</span> Board
 &gt;   <span style="color:red;">,</span> dist      <span style="color:red;">::</span> Int
 &gt;   <span style="color:red;">,</span> blank     <span style="color:red;">::</span> <span style="color:red;">(</span>Int<span style="color:red;">,</span> Int<span style="color:red;">)</span>
 &gt;   <span style="color:red;">,</span> moves     <span style="color:red;">::</span> Int
-&gt;   <span style="color:red;">,</span> previous  <span style="color:red;">::</span> Maybe GameState 
+&gt;   <span style="color:red;">,</span> previous  <span style="color:red;">::</span> Maybe GameState
 &gt;   <span style="color:red;">}</span> <span style="color:blue;font-weight:bold;">deriving</span> <span style="color:red;">(</span>Show<span style="color:red;">,</span> Eq<span style="color:red;">,</span> Ord<span style="color:red;">)</span>
 </code></pre>
 <pre class="sourceCode haskell"><code class="sourceCode haskell">&gt; boards <span style="color:red;">::</span> GameState <span style="color:red;">-&gt;</span> <span style="color:red;">[</span>Board<span style="color:red;">]</span>
@@ -202,21 +165,21 @@ excerpt: !ruby/object:Hpricot::Doc
 <pre class="sourceCode haskell"><code class="sourceCode haskell">&gt; solve <span style="color:red;">::</span> GameState <span style="color:red;">-&gt;</span> GameState
 &gt; solve p <span style="color:red;">=</span> go <span style="color:red;">(</span>PQ.fromList <span style="color:red;">[</span><span style="color:red;">(</span>dist p<span style="color:red;">,</span> p<span style="color:red;">)</span><span style="color:red;">]</span><span style="color:red;">)</span>
 &gt;   <span style="color:blue;font-weight:bold;">where</span>
-&gt;     go fr <span style="color:red;">=</span> <span style="color:blue;font-weight:bold;">if</span> dist puzzle == <span class="hs-num">0</span> 
-&gt;             <span style="color:blue;font-weight:bold;">then</span> puzzle 
+&gt;     go fr <span style="color:red;">=</span> <span style="color:blue;font-weight:bold;">if</span> dist puzzle == <span class="hs-num">0</span>
+&gt;             <span style="color:blue;font-weight:bold;">then</span> puzzle
 &gt;             <span style="color:blue;font-weight:bold;">else</span> go fr2
 &gt;       <span style="color:blue;font-weight:bold;">where</span>
 &gt;         <span style="color:green;">-- Retrieve the game state with the lowest priority and     &gt;         -- remove it from</span>
 &gt;         <span style="color:green;">-- the frontier.</span>
 &gt;         <span style="color:red;">(</span><span style="color:red;">(</span><span style="color:blue;font-weight:bold;">_</span><span style="color:red;">,</span> puzzle<span style="color:red;">)</span><span style="color:red;">,</span> fr1<span style="color:red;">)</span> <span style="color:red;">=</span> PQ.deleteFindMin fr
-&gt; 
+&gt;
 &gt;         <span style="color:green;">-- If the new board is the smae as the previous board then</span>
 &gt;         <span style="color:green;">-- do not add it to the queue since it has already been      &gt;         -- explored.</span>
 &gt;         ns <span style="color:red;">=</span> <span style="color:blue;font-weight:bold;">case</span> previous puzzle <span style="color:blue;font-weight:bold;">of</span>
 &gt;           Nothing <span style="color:red;">-&gt;</span> neighbors puzzle
 &gt;           Just n  <span style="color:red;">-&gt;</span> filter <span style="color:red;">(</span><span style="color:red;">\</span>x <span style="color:red;">-&gt;</span> board x /= board n<span style="color:red;">)</span>
 <span style="color:red;">&gt;                             (</span>neighbors puzzle<span style="color:red;">)</span>
-&gt; 
+&gt;
 &gt;         <span style="color:green;">-- The priority of a puzzle is the number of moves so far</span>
 &gt;         <span style="color:green;">-- plus the manhattan distance.</span>
 &gt;         ps  <span style="color:red;">=</span> zip <span style="color:red;">[</span>moves q + dist q <span style="color:red;">|</span> q <span style="color:red;">&lt;-</span> ns<span style="color:red;">]</span> ns
