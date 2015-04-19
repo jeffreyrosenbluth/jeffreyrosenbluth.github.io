@@ -11,3 +11,12 @@ github_username:  jeffreyrosenbluth
 
 # Build settings
 markdown: kramdown
+
+# Exclude these files from your production _site
+exclude:
+    - Gemfile
+    - Gemfile.lock
+    - LICENSE
+    - README.md
+
+google_analytics: UA-62029615-1
