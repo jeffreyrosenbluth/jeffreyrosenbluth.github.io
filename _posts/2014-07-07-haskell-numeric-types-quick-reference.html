@@ -1,0 +1,38 @@
+---
+layout: post
+title: 'Haskell numeric types: quick reference'
+---
+<div style="text-align:center;">
+<div class="figure"><img src="/assets/chart.png" alt="" /></div>
+</div>
+<h3 id="num">Num</h3>
+<p><code>class Num a</code></p>
+<pre><code>(+), (*), (-), abs, signum, fromInteger, (negate | (-))</code></pre>
+<h3 id="real">Real</h3>
+<p><code>class (Num a, Ord a) =&gt; Real</code></p>
+<pre><code>toRational</code></pre>
+<h3 id="fractional">Fractional</h3>
+<p><code>class Num a =&gt; Fractional a</code></p>
+<pre><code>(/), recip, fromRational</code></pre>
+<h3 id="integral">Integral</h3>
+<p><code>class (Real a, Enum a) =&gt; Interal a</code></p>
+<pre><code>quot, rem, div, mod, quotRem, divMod, toInteger</code></pre>
+<h3 id="realfrac">RealFrac</h3>
+<p><code>class (Real a, Fractional a) =&gt; RealFrac a</code></p>
+<pre><code>properFraction, truncate, round, ceiling, floor</code></pre>
+<h3 id="floating">Floating</h3>
+<p><code>class Fractional a =&gt; Floating a</code></p>
+<pre><code>pi,    exp,  sqrt,
+log,   (**), logBase,
+sin,   tan,   cos,
+asin,  atan,  acos,
+sinh,  tanh,  cosh,
+asinh, atanh, acosh</code></pre>
+<h3 id="realfloat">RealFloat</h3>
+<p><code>class (RealFrac a, Floating a) =&gt; RealFloat a</code></p>
+<pre><code>floatRadix, floatDigits, floatRange,
+decodeFloat, encodeFloat, exponent,
+significand, isNaN, isInfinite,
+isDenormalized, isNegativeZero, isIEEE,
+atan2 </code></pre>
+<div class="references"></div>

@@ -1,0 +1,59 @@
+---
+layout: post
+title: Convert hs to lhs
+---
+<h1 id="hs2lhs">hs2lhs</h1>
+<h2 id="tldr-here-is-the-code-to-convert-hs-to-lhs">tl;dr <a href="https://github.com/jeffreyrosenbluth/Literate">Here is the code to convert hs to lhs</a></h2>
+<p>Often I decide to write a blog post based on some haskell code that I have already written in <em>normal</em> (<code>.hs</code>) form. Had I known before writing the code that it would become a blog post I would have written it using the literate haskell (<code>.lhs</code>) format. So I wrote this small program to convert <code>.hs</code> to <code>.lhs</code></p>
+<p>Although the script is short (probably over golfed), it does demonstrate some nice haskell features.</p>
+<h3>Overloaded Strings and Data.Text</h3>
+<p>The ghc <code>OverLoadedStrings</code> language extension allows you to use string literals as text literals so you don’t have to convert <code>String</code> to <code>Text</code>.</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">&gt; <span style="color:green;">{-# LANGUAGE OverloadedStrings #-}</span>
+</code></pre>
+<h3>Multi-way if-expressions</h3>
+<p>Multi-way if-expressions allow the use of the guard syntax we commonly see for top level functions in if statements:</p>
+<pre><code>if | cond1 -&gt; expr1
+   | cond2 -&gt; expr2
+      ...
+   | condn -&gt; exprn</code></pre>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">&gt; <span style="color:green;">{-# LANGUAGE MultiWayIf        #-}</span>
+</code></pre>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">&gt; <span style="color:blue;font-weight:bold;">module</span> Main <span style="color:blue;font-weight:bold;">where</span>
+&gt;
+&gt; <span style="color:blue;font-weight:bold;">import</span>            Control.Applicative <span style="color:red;">(</span><span style="color:red;">(</span>&lt;$&gt;<span style="color:red;">)</span><span style="color:red;">,</span> <span style="color:red;">(</span>&lt;|&gt;<span style="color:red;">)</span><span style="color:red;">)</span>
+&gt; <span style="color:blue;font-weight:bold;">import</span>            Data.Maybe          <span style="color:red;">(</span>fromMaybe<span style="color:red;">)</span>
+&gt; <span style="color:blue;font-weight:bold;">import</span>            Data.Text           <span style="color:red;">(</span>Text<span style="color:red;">,</span> stripStart<span style="color:red;">,</span> stripPrefix<span style="color:red;">,</span>
+&gt;                                        isPrefixOf<span style="color:red;">,</span> isSuffixOf<span style="color:red;">)</span>
+&gt; <span style="color:blue;font-weight:bold;">import</span> <span style="color:blue;font-weight:bold;">qualified</span>  Data.Text           <span style="color:blue;font-weight:bold;">as</span> T
+&gt; <span style="color:blue;font-weight:bold;">import</span> <span style="color:blue;font-weight:bold;">qualified</span>  Data.Text.IO        <span style="color:blue;font-weight:bold;">as</span> T
+&gt; <span style="color:blue;font-weight:bold;">import</span>            System.Environment
+</code></pre>
+<p>In order to handle line breaks, we need to keep track of whether or not the last line parsed was a comments or code.</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">&gt; <span style="color:blue;font-weight:bold;">data</span> Tag <span style="color:red;">=</span> Comment <span style="color:red;">|</span> Code
+</code></pre>
+<h3>Applicative and Alternative</h3>
+<p>The core of the program is the <code>lhsLine</code> function which converts each line in the <code>.hs</code> file to a line in the <code>.lhs</code> file and keeps track of the <code>Tag</code>. The <code>stripPrefix</code> function from <code>Data.Text</code> returns the input text stripped of a prefix as a <code>Maybe</code> value. It returns <code>Nothing</code> if the prefix does not match beginning of the text. We use <code>fmap</code> (<code>&lt;$&gt;</code>) to pair this result with its <code>Tag</code> inside the <code>Maybe</code> and the <code>Alternative</code> instance of <code>Maybe</code> (<code>&lt;|&gt;</code>) to choose the first <code>Just</code> value (or <code>Nothing</code>) if neither alternative matches.</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">&gt; lhsLine <span style="color:red;">::</span> Tag <span style="color:red;">-&gt;</span> Text <span style="color:red;">-&gt;</span> <span style="color:red;">(</span>Tag<span style="color:red;">,</span> Text<span style="color:red;">)</span>
+&gt; lhsLine w t <span style="color:red;">=</span> fromMaybe d c
+&gt;   <span style="color:blue;font-weight:bold;">where</span>
+&gt;     d <span style="color:red;">=</span> <span style="color:blue;font-weight:bold;">if</span> <span style="color:red;">|</span> t == T.empty <span style="color:red;">-&gt;</span> <span style="color:red;">(</span>Code<span style="color:red;">,</span> <span style="color:teal;">""</span><span style="color:red;">)</span>
+&gt;            <span style="color:red;">|</span> isPrefixOf <span style="color:teal;">"{-#"</span> t &amp;&amp;
+&gt;              isSuffixOf <span style="color:teal;">"#-}"</span> t <span style="color:red;">-&gt;</span> <span style="color:red;">(</span>Code<span style="color:red;">,</span> <span style="color:teal;">"&gt; "</span> `T.append` t<span style="color:red;">)</span>
+&gt;            <span style="color:red;">|</span> otherwise <span style="color:red;">-&gt;</span> <span style="color:red;">(</span>Code<span style="color:red;">,</span> s `T.append` t<span style="color:red;">)</span>
+&gt;     s <span style="color:red;">=</span> <span style="color:blue;font-weight:bold;">case</span> w <span style="color:blue;font-weight:bold;">of</span> <span style="color:red;">{</span>Comment <span style="color:red;">-&gt;</span> <span style="color:teal;">"\n&gt; "</span><span style="color:red;">;</span> Code <span style="color:red;">-&gt;</span> <span style="color:teal;">"&gt; "</span><span style="color:red;">}</span>
+&gt;     c <span style="color:red;">=</span> stripC <span style="color:teal;">"-- |"</span> t &lt;|&gt; stripC <span style="color:teal;">"--"</span>  t
+&gt;     stripC p t <span style="color:red;">=</span> <span style="color:red;">(</span><span style="color:red;">\</span>x <span style="color:red;">-&gt;</span> <span style="color:red;">(</span>Comment<span style="color:red;">,</span> stripStart x<span style="color:red;">)</span><span style="color:red;">)</span> &lt;$&gt; stripPrefix p t
+</code></pre>
+<p>We could use the State monad but it would be overkill. Simply threading the state (<code>Tag</code>) through as an argument is fine.</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">&gt; lhs <span style="color:red;">::</span> Tag <span style="color:red;">-&gt;</span> <span style="color:red;">[</span>Text<span style="color:red;">]</span> <span style="color:red;">-&gt;</span> <span style="color:red;">[</span>Text<span style="color:red;">]</span>
+&gt; lhs <span style="color:blue;font-weight:bold;">_</span> [] <span style="color:red;">=</span> []
+&gt; lhs c <span style="color:red;">(</span>t:ts<span style="color:red;">)</span> <span style="color:red;">=</span> t' : <span style="color:red;">(</span>lhs c' ts<span style="color:red;">)</span>
+&gt;   <span style="color:blue;font-weight:bold;">where</span> <span style="color:red;">(</span>c'<span style="color:red;">,</span> t'<span style="color:red;">)</span> <span style="color:red;">=</span> lhsLine c t
+</code></pre>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">&gt; main <span style="color:red;">=</span> <span style="color:blue;font-weight:bold;">do</span>
+&gt;   text <span style="color:red;">&lt;-</span> T.readFile . head =&lt;&lt; getArgs
+&gt;   <span style="color:blue;font-weight:bold;">let</span> p <span style="color:red;">=</span> T.lines text
+&gt;   mapM_ T.putStrLn <span style="color:red;">(</span>lhs Code p<span style="color:red;">)</span>
+</code></pre>
+<p>Give it a try!</p>
+<div class="references"></div>
