@@ -20,3 +20,5 @@ exclude:
     - README.md
 
 google_analytics: UA-62029615-1
+
+disqus: martingalemeasure
