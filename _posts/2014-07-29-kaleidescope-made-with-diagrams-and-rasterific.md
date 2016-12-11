@@ -3,7 +3,8 @@ layout: post
 title: Kaleidoscope
 tags: haskell, diagrams
 ---
-##Creating a kaleidoscope with haskell and the diagrams DSL.
+
+## Creating a kaleidoscope with haskell and the diagrams DSL.
 
 ![Kaleidoscope GIF](/assets/kaleidoscope10.gif)
 
